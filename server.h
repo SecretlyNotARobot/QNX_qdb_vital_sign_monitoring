@@ -11,9 +11,26 @@
 #define MAX_STRING_LEN    256
 #define TEMPERATURE (_IO_MAX+200)
 #define HEARTRATE (_IO_MAX+201)
+#define RESPIRATION (_IO_MAX+202)
+#define SAO2 (_IO_MAX+203)
+#define BLOODPRESSURE (_IO_MAX+204)
 
 typedef struct get_vital_msg {
 	uint16_t type;
 	unsigned vital_data;
+	unsigned vital_data_2;
 } get_vital_msg_t;
+
+typedef struct get_vital_msg_ews {
+	uint16_t type;
+	unsigned vital_data;
+	unsigned vital_data_2;
+	unsigned ews;
+} get_vital_msg_ews_t;
+
+typedef union
+{
+	struct _pulse pulse;
+    struct get_vital_msg_ews vmsg;
+} myMessage_t;
 

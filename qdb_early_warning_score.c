@@ -26,14 +26,6 @@
 
 int main(void) {
 
-
-
-	typedef union
-	{
-		struct _pulse pulse;
-	    struct get_vital_msg vmsg;
-	} myMessage_t;
-
 	myMessage_t msg;
 	int rcvid, msgid;
 	name_attach_t *attach_temp;
