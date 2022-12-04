@@ -20,17 +20,18 @@
  * https://www.sqlite.org/rescode.html#ok
  *
  */
-#define NUMTHREADS      2
+#define NUMTHREADS      5
 
 //Globals
-char *num_of_retrievals = "2";
+char *num_of_retrievals = "1000";
 int heartrate_coid;
 int temp_coid;
 int respiration_coid;
 int sao2_coid;
 int blood_pressure_coid;
 
-
+void createPriorityThread(pthread_t thread_id[] ,int index, int priority, void (*func));
+void ReceiveMessageOrPulseAndUpdateData(int, int*, char*, float*, int*);
 void* temp_vital(void*);
 void* respiration_vital(void*);
 void* heartrate_vital(void*);
@@ -45,29 +46,23 @@ int calculate_ews(int, int, int, int, int);
 
 int main(int argc, char **argv) {
 	//Variables for EWS
-	myMessage_t msg;
-	int rcvid, msgid;
 	name_attach_t *attach_temp;
 	name_attach_t *attach_heartrate;
 	name_attach_t *attach_respiration;
 	name_attach_t *attach_sao2;
 	name_attach_t *attach_blood_pressure;
-	char *success_rsp = "success";
-	int ews_temp;
-	int ews_heartrate;
-	int ews_respiration;
-	int ews_sao2;
-	int ews_blood_pressure;
-	int ews_total;
+	int ews_temp, ews_heartrate, ews_respiration;
+	int ews_sao2, ews_blood_pressure, ews_total;
 
 	//Vital Variables
-	int num_vitals = 3;
-	float temp;
-	float heartrate;
-	float respiration;
-	float sao2;
-	float blood_pressure_s;
-	float blood_pressure_d;
+	int num_vitals = NUMTHREADS;
+	float temp, heartrate, respiration, sao2, blood_pressure;
+	char* pulse_msg_temp = "temp is gone\n";
+	char* pulse_msg_hr = "heartrate is gone\n";
+	char* pulse_msg_resp = "respiration is gone\n";
+	char* pulse_msg_sao2 = "sao2 is gone\n";
+	char* pulse_msg_bp = "blood pressure is gone\n";
+
 
 	//create all channels
 	attach_temp = name_attach(NULL, "temp", 0);
@@ -77,201 +72,52 @@ int main(int argc, char **argv) {
 	attach_blood_pressure = name_attach(NULL, "bloodpressure", 0);
 
 	//Setting up the threads for each vital sign
-	pthread_t threads[NUMTHREADS];
+	pthread_t thread_id[NUMTHREADS];
 
-	//Get sched and prioirities set
-	struct sched_param schedparam1;
-	pthread_attr_t attr1;
-	schedparam1.sched_priority = 5;
-	pthread_attr_init(&attr1);
-	pthread_attr_setinheritsched(&attr1, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setschedpolicy(&attr1, SCHED_RR);
-	pthread_attr_setschedparam(&attr1, &schedparam1);
+	// Create threads 1-5 with correct priorities
+	for (int i = 0; i < NUMTHREADS; i++) {
+		switch (i) {
+		case 0:
+				createPriorityThread(thread_id, i, 5, temp_vital);
+				break;
 
-	struct sched_param schedparam2;
-	pthread_attr_t attr2;
-	schedparam2.sched_priority = 5;
-	pthread_attr_init(&attr2);
-	pthread_attr_setinheritsched(&attr2, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setschedpolicy(&attr2, SCHED_RR);
-	pthread_attr_setschedparam(&attr2, &schedparam2);
+		case 1:
+				createPriorityThread(thread_id, i, 5, heartrate_vital);
+				break;
 
-	struct sched_param schedparam3;
-	pthread_attr_t attr3;
-	schedparam3.sched_priority = 5;
-	pthread_attr_init(&attr3);
-	pthread_attr_setinheritsched(&attr3, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setschedpolicy(&attr3, SCHED_RR);
-	pthread_attr_setschedparam(&attr3, &schedparam3);
+		case 2:
+				createPriorityThread(thread_id, i, 5, respiration_vital);
+				break;
 
-	struct sched_param schedparam4;
-	pthread_attr_t attr4;
-	schedparam4.sched_priority = 5;
-	pthread_attr_init(&attr4);
-	pthread_attr_setinheritsched(&attr4, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setschedpolicy(&attr4, SCHED_RR);
-	pthread_attr_setschedparam(&attr4, &schedparam4);
+		case 3:
+				createPriorityThread(thread_id, i, 5, sao2_vital);
+				break;
 
-	struct sched_param schedparam5;
-	pthread_attr_t attr5;
-	schedparam5.sched_priority = 5;
-	pthread_attr_init(&attr5);
-	pthread_attr_setinheritsched(&attr5, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setschedpolicy(&attr5, SCHED_RR);
-	pthread_attr_setschedparam(&attr5, &schedparam5);
-
-
-	pthread_create(&threads[0], &attr1, temp_vital, NULL);
-	pthread_create(&threads[1], &attr2, heartrate_vital, NULL);
-	pthread_create(&threads[2], &attr3, respiration_vital, NULL);
-	pthread_create(&threads[3], &attr4, sao2_vital, NULL);
-	pthread_create(&threads[4], &attr5, blood_pressure_vital, NULL);
-
-
+		case 4:
+				createPriorityThread(thread_id, i, 5, blood_pressure_vital);
+				break;
+		}
+	}
 
 
     //the server should keep receiving, processing and replying to messages
 	while(num_vitals > 0)
 	{
-	  //code to receive msg or pulse from temp
-		rcvid = MsgReceive(attach_temp->chid, &msg, sizeof(msg), NULL);
-		if(rcvid == -1){
-			perror("MsgReceive()");
-			exit(-1);
-		}
-	  //check if it was a pulse or a message
-		if(rcvid == 0){
-			switch(msg.pulse.code){
-				case _PULSE_CODE_DISCONNECT:
-					num_vitals--;
 
-					printf("temp is gone\n"); break;
-				default:
-					printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
-			}
-		}
-		else if (rcvid > 0){
-			//get vital data, store it ... assume it's the correct data type (it should be)
-			temp = msg.vmsg.vital_data;
-			ews_temp = msg.vmsg.ews;
-			msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
-			if(msgid == -1){
-				perror("MsgReply()");
-				exit(-1);
-			}
-		}
+		//Receive msg or pulse from temp
+		ReceiveMessageOrPulseAndUpdateData(attach_temp->chid, &num_vitals, pulse_msg_temp, &temp, &ews_temp);
 
-	  //code to receive msg or pulse from heartrate
-		rcvid = MsgReceive(attach_heartrate->chid, &msg, sizeof(msg), NULL);
-		if(rcvid == -1){
-			perror("MsgReceive()");
-			exit(-1);
-		}
-	  //check if it was a pulse or a message
-		if(rcvid == 0){
-			switch(msg.pulse.code){
-				case _PULSE_CODE_DISCONNECT:
-					num_vitals--;
-					printf("heartrate is gone\n"); break;
-				default:
-					printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
-			}
-		}
-		else if (rcvid > 0){
-			//get vital data, store it ... assume it's the correct data type (it should be)
-			heartrate = msg.vmsg.vital_data;
-			ews_heartrate = msg.vmsg.ews;
-			msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
-			if(msgid == -1){
-				perror("MsgReply()");
-				exit(-1);
-			}
-		}
+		//Receive msg or pulse from heartrate
+		ReceiveMessageOrPulseAndUpdateData(attach_heartrate->chid, &num_vitals, pulse_msg_hr, &heartrate, &ews_heartrate);
 
-		//code to receive msg or pulse from respiration
-		rcvid = MsgReceive(attach_respiration->chid, &msg, sizeof(msg), NULL);
-		if(rcvid == -1){
-			perror("MsgReceive()");
-			exit(-1);
-		}
-	    //check if it was a pulse or a message
-		if(rcvid == 0){
-			switch(msg.pulse.code){
-				case _PULSE_CODE_DISCONNECT:
-					num_vitals--;
-					printf("respiration is gone\n"); break;
-				default:
-					printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
-			}
-		}
-		else if (rcvid > 0){
-			//get vital data, store it ... assume it's the correct data type (it should be)
-			respiration = msg.vmsg.vital_data;
-			ews_respiration = msg.vmsg.ews;
-			msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
-			if(msgid == -1){
-				perror("MsgReply()");
-				exit(-1);
-			}
-		}
+		//Receive msg or pulse from respiration
+		ReceiveMessageOrPulseAndUpdateData(attach_respiration->chid, &num_vitals, pulse_msg_resp, &respiration, &ews_respiration);
 
+		//Receive msg or pulse from sao2
+		ReceiveMessageOrPulseAndUpdateData(attach_sao2->chid, &num_vitals, pulse_msg_sao2, &sao2, &ews_sao2);
 
-		//code to receive msg or pulse from respiration
-		rcvid = MsgReceive(attach_sao2->chid, &msg, sizeof(msg), NULL);
-		if(rcvid == -1){
-			perror("MsgReceive()");
-			exit(-1);
-		}
-		//check if it was a pulse or a message
-		if(rcvid == 0){
-			switch(msg.pulse.code){
-				case _PULSE_CODE_DISCONNECT:
-					num_vitals--;
-					printf("sao2 is gone\n"); break;
-				default:
-					printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
-			}
-		}
-		else if (rcvid > 0){
-			//get vital data, store it ... assume it's the correct data type (it should be)
-			sao2 = msg.vmsg.vital_data;
-			ews_sao2 = msg.vmsg.ews;
-			msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
-			if(msgid == -1){
-				perror("MsgReply()");
-				exit(-1);
-			}
-		}
-
-
-		//code to receive msg or pulse from respiration
-		rcvid = MsgReceive(attach_blood_pressure->chid, &msg, sizeof(msg), NULL);
-		if(rcvid == -1){
-			perror("MsgReceive()");
-			exit(-1);
-		}
-		//check if it was a pulse or a message
-		if(rcvid == 0){
-			switch(msg.pulse.code){
-				case _PULSE_CODE_DISCONNECT:
-					num_vitals--;
-					printf("blood pressure is gone\n"); break;
-				default:
-					printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
-			}
-		}
-		else if (rcvid > 0){
-			//get vital data, store it ... assume it's the correct data type (it should be)
-			blood_pressure_s = msg.vmsg.vital_data;
-			blood_pressure_d = msg.vmsg.vital_data_2;
-			ews_blood_pressure = msg.vmsg.ews;
-			msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
-			if(msgid == -1){
-				perror("MsgReply()");
-				exit(-1);
-			}
-		}
-
+		//Receive msg or pulse from blood pressure
+		ReceiveMessageOrPulseAndUpdateData(attach_blood_pressure->chid, &num_vitals, pulse_msg_bp, &blood_pressure, &ews_blood_pressure);
 
 		//Calculate EWS and print it
 		ews_total = calculate_ews(ews_heartrate, ews_temp, ews_respiration, ews_sao2, ews_blood_pressure);
@@ -280,7 +126,7 @@ int main(int argc, char **argv) {
 
 	}
 
-	//remove the name from the namespace and destroy the channel
+	//remove the names from the namespace and destroy the channels
 	name_detach(attach_temp, 0);
 	name_detach(attach_heartrate, 0);
 	name_detach(attach_respiration, 0);
@@ -289,7 +135,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < NUMTHREADS; i++) {
         void *status;
-        if(pthread_join(threads[i], &status) != EOK){
+        if(pthread_join(thread_id[i], &status) != EOK){
         	printf("error joining\n");
         	exit(-1);
         }
@@ -304,6 +150,22 @@ int main(int argc, char **argv) {
 //**************
 //**************
 
+void createPriorityThread(pthread_t thread_id[] ,int index, int priority, void (*func)) {
+	pthread_attr_t attr;
+	struct sched_param param; //Structure that describes scheduling parameters
+
+	// Initialize attr structure and use its scheduling policy
+	pthread_attr_init( &attr );
+	pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+
+	// Set the scheduling parameters, policy, and priority
+	param.sched_priority = priority;
+	pthread_attr_setschedparam (&attr, &param);
+	pthread_attr_setschedpolicy (&attr, SCHED_RR);
+
+	pthread_create (&thread_id[index], &attr, func, NULL); // Create the thread
+}
+
 //Calculate early warning score
 int calculate_ews(int hr_ews, int tmp_ews, int resp_ews, int sao2_ews, int bp_ews) {
 	int aggregate_score = hr_ews + tmp_ews + resp_ews + sao2_ews + bp_ews;
@@ -313,18 +175,34 @@ int calculate_ews(int hr_ews, int tmp_ews, int resp_ews, int sao2_ews, int bp_ew
 //Callback - temp
 static int callback_temp(void *NotUsed, int argc, char **argv, char **azColName) {
 	char rmsg[MAX_STRING_LEN];
-	struct get_vital_msg vmsg;
+	struct get_vital_msg_ews vmsg;
 	float val;
 	long msg_send_id;
 
 	//Get column value
 	val = atof(argv[0]);
-	//TODO: calculate temp ews
+
+
+	//Calculate EWS
+	if (val <= 35.0) {
+		vmsg.ews = 3;
+	}
+	else if (val <= 36.0) {
+			vmsg.ews = 1;
+		}
+	else if (val <= 38.0) {
+			vmsg.ews = 0;
+		}
+	else if (val <= 39.0) {
+			vmsg.ews = 1;
+		}
+	else {
+		vmsg.ews = 2;
+	}
 
 	//Send it to EWS calculator
 	vmsg.type = TEMPERATURE;
 	vmsg.vital_data = val;
-	//TODO: include ews in send message
 	msg_send_id = MsgSend(temp_coid, &vmsg, sizeof(vmsg), rmsg, sizeof(rmsg));
 	if(msg_send_id == -1){
 		perror("MsgSend()");
@@ -340,18 +218,36 @@ static int callback_temp(void *NotUsed, int argc, char **argv, char **azColName)
 //Callback - heartrate
 static int callback_hr(void *NotUsed, int argc, char **argv, char **azColName) {
 	char rmsg[MAX_STRING_LEN];
-	struct get_vital_msg vmsg;
+	struct get_vital_msg_ews vmsg;
 	float val;
 	long msg_send_id;
 
 	//Get column value
 	val = atof(argv[0]);
-	//TODO: calculate heartrate ews
+
+	//Calculate EWS
+	if (val <= 40) {
+		vmsg.ews = 3;
+	}
+	else if (val <= 50) {
+			vmsg.ews = 1;
+		}
+	else if (val <= 90) {
+			vmsg.ews = 0;
+		}
+	else if (val <= 110) {
+			vmsg.ews = 1;
+		}
+	else if (val <= 130) {
+			vmsg.ews = 2;
+		}
+	else {
+		vmsg.ews = 3;
+	}
 
 	//Send it to EWS calculator
 	vmsg.type = HEARTRATE;
 	vmsg.vital_data = val;
-	//TODO: include ews in send message
 	msg_send_id = MsgSend(heartrate_coid, &vmsg, sizeof(vmsg), rmsg, sizeof(rmsg));
 	if(msg_send_id == -1){
 		perror("MsgSend()");
@@ -367,18 +263,33 @@ static int callback_hr(void *NotUsed, int argc, char **argv, char **azColName) {
 //Callback - resp
 static int callback_resp(void *NotUsed, int argc, char **argv, char **azColName) {
 	char rmsg[MAX_STRING_LEN];
-	struct get_vital_msg vmsg;
+	struct get_vital_msg_ews vmsg;
 	float val;
 	long msg_send_id;
 
 	//Get column value
 	val = atof(argv[0]);
-	//TODO: calculate resp ews
+
+	//Calculate Respiration EWS
+	if (val <= 8) {
+		vmsg.ews = 3;
+	}
+	else if (val <= 11) {
+			vmsg.ews = 1;
+		}
+	else if (val <= 20) {
+			vmsg.ews = 0;
+		}
+	else if (val <= 24) {
+			vmsg.ews = 2;
+		}
+	else {
+		vmsg.ews = 3;
+	}
 
 	//Send it to EWS calculator
 	vmsg.type = RESPIRATION;
 	vmsg.vital_data = val;
-	//TODO: include ews in send message
 	msg_send_id = MsgSend(respiration_coid, &vmsg, sizeof(vmsg), rmsg, sizeof(rmsg));
 	if(msg_send_id == -1){
 		perror("MsgSend()");
@@ -394,7 +305,7 @@ static int callback_resp(void *NotUsed, int argc, char **argv, char **azColName)
 //Callback - sao2
 static int callback_sao2(void *NotUsed, int argc, char **argv, char **azColName) {
 	char rmsg[MAX_STRING_LEN];
-	struct get_vital_msg vmsg;
+	struct get_vital_msg_ews vmsg;
 	float val;
 	long msg_send_id;
 
@@ -402,10 +313,23 @@ static int callback_sao2(void *NotUsed, int argc, char **argv, char **azColName)
 	val = atof(argv[0]);
 	//TODO: calculate sao2 ews
 
+	//Calculate SAO2 EWS
+	if (val <= 91) {
+		vmsg.ews = 3;
+	}
+	else if (val <= 93) {
+			vmsg.ews = 2;
+		}
+	else if (val <= 95) {
+			vmsg.ews = 1;
+		}
+	else {
+		vmsg.ews = 0;
+	}
+
 	//Send it to EWS calculator
 	vmsg.type = SAO2;
 	vmsg.vital_data = val;
-	//TODO: include ews in send message
 	msg_send_id = MsgSend(sao2_coid, &vmsg, sizeof(vmsg), rmsg, sizeof(rmsg));
 	if(msg_send_id == -1){
 		perror("MsgSend()");
@@ -421,20 +345,32 @@ static int callback_sao2(void *NotUsed, int argc, char **argv, char **azColName)
 //Callback - bp
 static int callback_bp(void *NotUsed, int argc, char **argv, char **azColName) {
 	char rmsg[MAX_STRING_LEN];
-	struct get_vital_msg vmsg;
-	float systolic, diastolic;
+	struct get_vital_msg_ews vmsg;
+	float systolic;
 	long msg_send_id;
 
 	//Get column value
 	systolic = atof(argv[0]);
-	diastolic = atof(argv[1]);
-	//TODO: calculate bloodpressure ews
 
+	//Calculate Systolic Blood Pressure EWS
+	if (systolic <= 90) {
+		vmsg.ews = 3;
+	}
+	else if (systolic <= 100) {
+			vmsg.ews = 2;
+		}
+	else if (systolic <= 110) {
+			vmsg.ews = 1;
+		}
+	else if (systolic <= 219) {
+			vmsg.ews = 0;
+		}
+	else {
+		vmsg.ews = 3;
+	}
 	//Send it to EWS calculator
 	vmsg.type = BLOODPRESSURE;
 	vmsg.vital_data = systolic;
-	vmsg.vital_data_2 = diastolic;
-	//TODO: include ews in send message
 	msg_send_id = MsgSend(blood_pressure_coid, &vmsg, sizeof(vmsg), rmsg, sizeof(rmsg));
 	if(msg_send_id == -1){
 		perror("MsgSend()");
@@ -442,7 +378,7 @@ static int callback_bp(void *NotUsed, int argc, char **argv, char **azColName) {
 	}
 
 	//TODO: send it to remote database
-	printf("%s = %2.2f ---- %s = %2.2f\n", azColName[0], systolic, azColName[1], diastolic);
+	printf("%s = %2.2f\n", azColName[0], systolic);
 
     return 0;
 }
@@ -454,7 +390,7 @@ void* temp_vital(void* arg){
 	double cpu_time_used;
 	int rc; //return code
 	sqlite3 *handle;
-	char select[100] = "select temperature from vitalperiodic limit ";
+	char select[100] = "select temperature from vitalperiodic where patientunitstayid=2559053 limit ";
 	strcat(select, num_of_retrievals);
 	char *errmsg;
 
@@ -500,7 +436,7 @@ void* heartrate_vital(void* arg){
 	double cpu_time_used;
 	int rc; //return code
 	sqlite3 *handle;
-	char select[100] = "select heartrate from vitalperiodic limit ";
+	char select[100] = "select heartrate from vitalperiodic where patientunitstayid=2559053 limit ";
 	strcat(select, num_of_retrievals);
 	char *errmsg;
 
@@ -546,7 +482,7 @@ void* respiration_vital(void* arg){
 	double cpu_time_used;
 	int rc;//return code
 	sqlite3 *handle;
-	char select[100] = "select respiration from vitalperiodic limit ";
+	char select[100] = "select respiration from vitalperiodic where patientunitstayid=2559053 limit ";
 	strcat(select, num_of_retrievals);
 	char *errmsg;
 
@@ -593,7 +529,7 @@ void* sao2_vital(void* arg){
 	double cpu_time_used;
 	int rc; //return code
 	sqlite3 *handle;
-	char select[100] = "select sao2 from vitalperiodic limit ";
+	char select[100] = "select sao2 from vitalperiodic where patientunitstayid=2559053 limit ";
 	strcat(select, num_of_retrievals);
 	char *errmsg;
 
@@ -638,7 +574,7 @@ void* blood_pressure_vital(void* arg){
 	double cpu_time_used;
 	int rc; //return code
 	sqlite3 *handle;
-	char select[100] = "select systemicsystolic, systemicdiastolic from vitalperiodic limit ";
+	char select[100] = "select systemicsystolic from vitalperiodic where patientunitstayid=2559053 limit ";
 	strcat(select, num_of_retrievals);
 	char *errmsg;
 
@@ -676,3 +612,45 @@ void* blood_pressure_vital(void* arg){
 
 	return NULL;
 }
+
+
+//Receive a Message and update appropriate vital data
+void ReceiveMessageOrPulseAndUpdateData(int chid, int* num_vitals, char* pulse_msg, float* data, int* ews){
+	int rcvid, msgid;
+	char *success_rsp = "success";
+	myMessage_t msg;
+
+	//code to receive msg or pulse from blood pressure
+	rcvid = MsgReceive(chid, &msg, sizeof(msg), NULL);
+	if(rcvid == -1){
+		perror("MsgReceive()");
+		exit(-1);
+	}
+	//check if it was a pulse or a message
+	if(rcvid == 0){
+		switch(msg.pulse.code){
+			case _PULSE_CODE_DISCONNECT:
+				*num_vitals = *num_vitals - 1;
+				printf("%s", pulse_msg); break;
+			default:
+				printf("code is = %d  |  value = %d\n", msg.pulse.code, msg.pulse.value.sival_int); break;
+		}
+	}
+	else if (rcvid > 0){
+		//get vital data, store it ... assume it's the correct data type (it should be)
+		*data = msg.vmsg.vital_data;
+		*ews = msg.vmsg.ews;
+		msgid = MsgReply(rcvid, 1, &success_rsp, sizeof(success_rsp));
+		if(msgid == -1){
+			perror("MsgReply()");
+			exit(-1);
+		}
+	}
+}
+
+
+
+
+
+
+

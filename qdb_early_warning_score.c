@@ -18,6 +18,7 @@
  *
  * https://www.sqlite.org/cintro.html
  * https://www.sqlite.org/rescode.html#ok
+ * https://www.tutorialspoint.com/sqlite/sqlite_c_cpp.htm#
  *
  */
 

@@ -18,13 +18,11 @@
 typedef struct get_vital_msg {
 	uint16_t type;
 	unsigned vital_data;
-	unsigned vital_data_2;
 } get_vital_msg_t;
 
 typedef struct get_vital_msg_ews {
 	uint16_t type;
 	unsigned vital_data;
-	unsigned vital_data_2;
 	unsigned ews;
 } get_vital_msg_ews_t;
 
