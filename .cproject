@@ -38,6 +38,11 @@
 							<tool id="com.qnx.qcc.tool.archiver.102562957" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.qnx.qcc.toolChain.2016397689.430227209" name="remote_test.c" rcbsApplicability="disable" resourcePath="remote_test.c" toolsToInvoke="com.qnx.qcc.tool.compiler.1338106874.88003327">
+						<tool id="com.qnx.qcc.tool.compiler.1338106874.88003327" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler.1338106874">
+							<inputType id="com.qnx.qcc.inputType.compiler.132394196" superClass="com.qnx.qcc.inputType.compiler"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -197,6 +202,19 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="x86_64-debug">
+			<resource resourceType="PROJECT" workspacePath="/project_code"/>
+		</configuration>
+		<configuration configurationName="x86_64-release">
+			<resource resourceType="PROJECT" workspacePath="/project_code"/>
+		</configuration>
+		<configuration configurationName="x86_64-coverage">
+			<resource resourceType="PROJECT" workspacePath="/project_code"/>
+		</configuration>
+		<configuration configurationName="x86_64-profile">
+			<resource resourceType="PROJECT" workspacePath="/project_code"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

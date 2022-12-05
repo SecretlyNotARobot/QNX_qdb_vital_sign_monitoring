@@ -6,7 +6,7 @@
 DEBUG = -g
 CC = qcc
 LD = qcc
-
+PLAT = x86_64
 
 TARGET = -Vgcc_ntox86_64
 #TARGET = -Vgcc_ntox86
@@ -14,12 +14,12 @@ TARGET = -Vgcc_ntox86_64
 #TARGET = -Vgcc_ntoaarch64le
 
 
-CFLAGS += $(DEBUG) $(TARGET) -Wall -lqdb -lsqlite3
+CFLAGS += $(DEBUG) $(TARGET) -Wall -lqdb -lsqlite3 -lsocket
 LDFLAGS+= $(DEBUG) $(TARGET)
-BINS = qdb_test qdb_temp qdb_respiration qdb_heartrate qdb_early_warning_score qdb_no_ews qdb_ews
-all: $(BINS)
+BINS = qdb_test qdb_temp qdb_respiration qdb_heartrate qdb_early_warning_score qdb_no_ews remote_test
+LIBS = includes\$(PLAT)\libqdb.so includes\$(PLAT)\libsqlite3.so includes\$(PLAT)\libicui18n.so includes\$(PLAT)\libicudata.so
+all: $(BINS) $(LIBS)
 
-all:	qdb_test qdb_temp qdb_respiration qdb_heartrate qdb_early_warning_score qdb_no_ews qdb_ews
 
 clean:
 	rm -f *.o $(BINS)
