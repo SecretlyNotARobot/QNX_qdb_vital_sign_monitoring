@@ -421,7 +421,7 @@ http_t* http_post( char const* url, void const* data, size_t size, void* memctx 
     internal->socket = socket;
 
     char* request_header;   
-    size_t request_header_len = 64 + strlen( resource ) + strlen( address ) + strlen( port );
+    size_t request_header_len = 100 + strlen( resource ) + strlen( address ) + strlen( port );
     if( request_header_len < sizeof( internal->request_header ) )
         {
         internal->request_header_large = NULL;
@@ -433,7 +433,7 @@ http_t* http_post( char const* url, void const* data, size_t size, void* memctx 
         request_header = internal->request_header_large;
         }       
     int default_http_port = (strcmp(port, "80") == 0);
-    sprintf( request_header, "POST %s HTTP/1.0\r\nHost: %s%s%s\r\nContent-Length: %d\r\n\r\n", resource, address, default_http_port ? "" : ":", default_http_port ? "" : port, 
+    sprintf( request_header, "POST %s HTTP/1.0\r\nHost: %s%s%s\r\nContent-Length: %d\r\nContent-Type: text/plain\r\n\r\n", resource, address, default_http_port ? "" : ":", default_http_port ? "" : port,
         (int) size );
     
     internal->request_data_size = size;
