@@ -11,7 +11,7 @@ int createTable(time_t *date);
 
 int createUser(char* Uuid);
 
-int uploadFrame(float heartrate, float temp, float respiration, float sao2, float bloodPressureS);
+int uploadFrame(float heartrate, float temp, float respiration, float sao2, float bloodPressureS, int mews);
 
 static char userId[17];
 static char tableId[10];

@@ -16,7 +16,7 @@ int main(void){
 	createUser("AAAABBBBCCCCDDDD");
 	printf("User ID: %s\n", getUserId());
 
-	uploadFrame(1.1111f, 2.2222f, 55555.0f, 0.0011f, 6.0f);
+	uploadFrame(1.1111f, 2.2222f, 55555.0f, 0.0011f, 6.0f, 99);
 
 	return 0;
 }

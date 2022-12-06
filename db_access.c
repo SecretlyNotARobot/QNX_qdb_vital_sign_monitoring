@@ -76,7 +76,7 @@ int createTable(time_t *date){
 	if(strcmp("[]", buf) == 0){
 		char createTableQuery[255];
 		//CREATE TABLE {tableId} (PatientId varchar(16), Heartrate float(4), Temp float(4), Respiration float(4), Sao2 float(4), BloodPressureS float(4))
-		sprintf(createTableQuery, "CREATE TABLE %s (PatientId varchar(16), Heartrate float(4), Temp float(4), Respiration float(4), Sao2 float(4), BloodPressureS float(4));", tableId);
+		sprintf(createTableQuery, "CREATE TABLE %s (PatientId varchar(16), Heartrate float(4), Temp float(4), Respiration float(4), Sao2 float(4), BloodPressureS float(4), Mews int);", tableId);
 #ifdef DEBUG
 		printf("rec code %i, %s\n", sendQuery(createTableQuery, strlen(createTableQuery), buf, sizeof(buf)), buf);
 #endif
@@ -117,9 +117,9 @@ int createUser(char* Uuid){
 	return 0;
 }
 
-int uploadFrame(float heartrate, float temp, float respiration, float sao2, float bloodPressureS){
+int uploadFrame(float heartrate, float temp, float respiration, float sao2, float bloodPressureS, int mews){
 	char query[512];
-	sprintf(query, "INSERT INTO %s VALUES('%s', %f, %f, %f, %f, %f);", tableId, userId, heartrate, temp, respiration, sao2, bloodPressureS);
+	sprintf(query, "INSERT INTO %s VALUES('%s', %f, %f, %f, %f, %f, %i);", tableId, userId, heartrate, temp, respiration, sao2, bloodPressureS, mews);
 #ifdef DEBUG
 	printf("insert query: %s\n");
 #endif
