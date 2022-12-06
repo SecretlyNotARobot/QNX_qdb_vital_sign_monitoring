@@ -14,15 +14,21 @@ TARGET = -Vgcc_ntox86_64
 #TARGET = -Vgcc_ntoaarch64le
 
 
-CFLAGS += $(DEBUG) $(TARGET) -Wall -lqdb -lsqlite3 -lsocket
-LDFLAGS+= $(DEBUG) $(TARGET)
-BINS = qdb_test qdb_temp qdb_respiration qdb_heartrate qdb_early_warning_score qdb_no_ews remote_test
+CFLAGS += $(DEBUG) $(TARGET) -Wall 
+LDFLAGS+= $(DEBUG) $(TARGET) -lqdb -lsqlite3 -lsocket
+BINS = qdb_respiration qdb_heartrate qdb_ews qdb_no_ews remote_test
 LIBS = includes\$(PLAT)\libqdb.so includes\$(PLAT)\libsqlite3.so includes\$(PLAT)\libicui18n.so includes\$(PLAT)\libicudata.so
-all: $(BINS) $(LIBS)
+OBJS = db_access.o
 
+all: $(OBJS) $(BINS) $(LIBS)
 
+remote_test: remote_test.c db_access.o
+
+db_access.o: db_access.c db_access.h
+	$(CC) $(CFLAGS) -c db_access.c
+	
 clean:
-	rm -f *.o $(BINS)
+	rm -f *.o $(BINS) $(OBJS)
 #	cd solutions; make clean
 
 #example.o: example.c
