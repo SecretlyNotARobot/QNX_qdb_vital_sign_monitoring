@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.qnx.tools.ide.qde.ui.QDELaunch">
-    <booleanAttribute key="auto_pick_program" value="false"/>
+    <booleanAttribute key="auto_pick_program" value="true"/>
     <booleanAttribute key="com.qnx.tools.ide.apsinfo.ui.launch.boolean_enable" value="false"/>
     <stringAttribute key="com.qnx.tools.ide.apsinfo.ui.launch.string_partion_name" value=""/>
     <booleanAttribute key="com.qnx.tools.ide.coverage.ui.launch.CLEAN_OLD_DATA" value="true"/>
@@ -83,7 +83,7 @@
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.coverage.ui.CoverageLaunch" value="false"/>
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.mat.ui.QDEMATLaunch" value="false"/>
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.profiler2.ui.launch" value="false"/>
-    <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.qde.debug" value="false"/>
+    <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.qde.debug" value="true"/>
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.qde.internal.ui.NoTool" value="false"/>
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.testrunner" value="false"/>
     <booleanAttribute key="com.qnx.tools.ide.qde.core.TOOL.run.com.qnx.tools.ide.valgrind.ui.launch.ValgrindLaunch" value="false"/>
@@ -99,12 +99,16 @@
     <stringAttribute key="com.qnx.tools.ide.valgrind.ui.launch.string_smc_check" value="stack"/>
     <stringAttribute key="com.qnx.tools.ide.valgrind.ui.launch.string_symbol_server_host" value=""/>
     <stringAttribute key="com.qnx.tools.ide.valgrind.ui.launch.string_verbosity_level" value="none"/>
+    <booleanAttribute key="org.eclipse.cdt.dsf.gdb.AUTO_SOLIB" value="true"/>
+    <stringAttribute key="org.eclipse.cdt.dsf.gdb.DEBUG_NAME" value="gdb"/>
+    <stringAttribute key="org.eclipse.cdt.dsf.gdb.GDB_INIT" value=".gdbinit"/>
+    <booleanAttribute key="org.eclipse.cdt.dsf.gdb.REMOTE_TCP" value="true"/>
     <listAttribute key="org.eclipse.cdt.dsf.gdb.SOLIB_PATH"/>
     <intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
     <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_ID" value="gdb"/>
     <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="run"/>
-    <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
-    <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
+    <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="false"/>
+    <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value=""/>
     <stringAttribute key="org.eclipse.cdt.launch.PLATFFORM" value="qnx"/>
     <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="remote_test"/>
     <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="project_code"/>
@@ -119,12 +123,13 @@
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="4"/>
     </listAttribute>
-    <booleanAttribute key="org.eclipse.debug.core.capture_output" value="false"/>
     <mapAttribute key="org.eclipse.debug.core.environmentVariables">
         <mapEntry key="LD_LIBRARY_PATH" value="/tmp"/>
         <mapEntry key="PATH" value="/tmp"/>
     </mapAttribute>
-    <booleanAttribute key="org.eclipse.debug.ui.ATTR_CONSOLE_OUTPUT_ON" value="false"/>
+    <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+        <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+    </listAttribute>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.BRANCH_SIM" value="false"/>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.CACHE_SIM" value="true"/>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1" value="false"/>

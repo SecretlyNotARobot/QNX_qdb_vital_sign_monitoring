@@ -123,12 +123,13 @@
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="4"/>
     </listAttribute>
-    <booleanAttribute key="org.eclipse.debug.core.capture_output" value="false"/>
     <mapAttribute key="org.eclipse.debug.core.environmentVariables">
         <mapEntry key="LD_LIBRARY_PATH" value="/tmp"/>
         <mapEntry key="PATH" value="/tmp"/>
     </mapAttribute>
-    <booleanAttribute key="org.eclipse.debug.ui.ATTR_CONSOLE_OUTPUT_ON" value="false"/>
+    <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+        <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+    </listAttribute>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.BRANCH_SIM" value="false"/>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.CACHE_SIM" value="true"/>
     <booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1" value="false"/>

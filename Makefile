@@ -24,6 +24,8 @@ all: $(OBJS) $(BINS) $(LIBS)
 
 remote_test: remote_test.c db_access.o
 
+qdb_ews: qdb_ews.c db_access.o
+
 db_access.o: db_access.c db_access.h
 	$(CC) $(CFLAGS) -c db_access.c
 	

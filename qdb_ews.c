@@ -13,6 +13,7 @@
 #include <time.h>
 
 #include "server.h" // defines messages between client and server
+#include "db_access.h" //defines functions for working with remote DB
 
 /** SQLite3 API Documentation:
  *
@@ -63,6 +64,11 @@ int main(int argc, char **argv) {
 	char* pulse_msg_sao2 = "sao2 is gone\n";
 	char* pulse_msg_bp = "blood pressure is gone\n";
 
+	//Set up remote DB
+	time_t currentTime;
+	time(&currentTime);
+	createTable(&currentTime);
+	createUser(NULL);
 
 	//create all channels
 	attach_temp = name_attach(NULL, "temp", 0);
@@ -122,7 +128,8 @@ int main(int argc, char **argv) {
 		//Calculate EWS and print it
 		ews_total = calculate_ews(ews_heartrate, ews_temp, ews_respiration, ews_sao2, ews_blood_pressure);
 		printf("Calculated aggregate EWS = %d\n", ews_total);
-		//TODO: Send to online database
+		//Send to online database
+		uploadFrame(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, ews_total);
 
 	}
 
