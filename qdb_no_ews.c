@@ -31,6 +31,8 @@ void* blood_pressure_vital(void*);
 static int callback(void*, int, char**, char**);
 
 int main(int argc, char **argv) {
+	time_t startTimestamp;
+	time(&startTimestamp);
 	pthread_t threads[NUMTHREADS];
 
 	//Get sched and prioirities set
@@ -89,6 +91,10 @@ int main(int argc, char **argv) {
         }
     }
 
+	time_t endTimestamp;
+	time(&endTimestamp);
+
+	printf("start time: %i end time: %i\nelapsed: %i", startTimestamp, endTimestamp, endTimestamp-startTimestamp);
 	return EXIT_SUCCESS;
 }
 

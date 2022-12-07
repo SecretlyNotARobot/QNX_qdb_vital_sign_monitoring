@@ -46,6 +46,8 @@ static int callback_bp(void*, int, char**, char**);
 int calculate_ews(int, int, int, int, int);
 
 int main(int argc, char **argv) {
+	time_t startTimestamp;
+	time(&startTimestamp);
 	//Variables for EWS
 	name_attach_t *attach_temp;
 	name_attach_t *attach_heartrate;
@@ -147,6 +149,11 @@ int main(int argc, char **argv) {
         	exit(-1);
         }
     }
+
+	time_t endTimestamp;
+	time(&endTimestamp);
+
+	printf("start time: %i end time: %i\nelapsed: %i", startTimestamp, endTimestamp, endTimestamp-startTimestamp);
 
 	return EXIT_SUCCESS;
 }

@@ -1,9 +1,13 @@
 #define CHEAPDB_SERVER_URL "http://cheapdb.azurewebsites.net/db/post"
-#define DEBUG
+//#define DEBUG
 
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include <pthread.h>
+
+int sendQueryAsync(char *query, int querySize);
 
 int sendQuery(char *query, int querySize, char *response, int responseSize);
 

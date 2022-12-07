@@ -4,11 +4,9 @@
 #define HTTP_IMPLEMENTATION
 #include "includes/http.h"
 
+
 // sends query, returns the HTTP code on a successful send or -1 on an error
 int sendQuery(char *query, int querySize, char *response, int responseSize){
-	//char requestBody[512];
-	//sprintf(requestBody, "{\"query\":\"%s\"}", query);
-	//printf("%s\n", requestBody);
 	http_t* request = http_post(CHEAPDB_SERVER_URL, query, querySize, NULL);
 
 		if( !request )
@@ -19,40 +17,52 @@ int sendQuery(char *query, int querySize, char *response, int responseSize){
 				return -1;
 			}
 
-			http_status_t status = HTTP_STATUS_PENDING;
-			int prev_size = -1;
-			while( status == HTTP_STATUS_PENDING )
-			{
-				status = http_process( request );
-				if( prev_size != (int) request->response_size )
-				{
-#ifdef DEBUG
-					printf( "%d byte(s) received.\n", (int) request->response_size );
-#endif
-
-					prev_size = (int) request->response_size;
-				}
-			}
-
-			if( status == HTTP_STATUS_FAILED )
+		http_status_t status = HTTP_STATUS_PENDING;
+		int prev_size = -1;
+		while( status == HTTP_STATUS_PENDING ){
+			status = http_process( request );
+			if( prev_size != (int) request->response_size )
 			{
 #ifdef DEBUG
-				printf( "HTTP request failed (%d): %s.\n", request->status_code, request->reason_phrase );
+				printf( "%d byte(s) received.\n", (int) request->response_size );
 #endif
-				http_release( request );
-				return request->status_code;
+
+				prev_size = (int) request->response_size;
 			}
+		}
+
+
+		if( status == HTTP_STATUS_FAILED ){
 #ifdef DEBUG
-			printf( "\nContent type: %s\n\n%s\n", request->content_type, (char const*)request->response_data );
+			printf( "HTTP request failed (%d): %s.\n", request->status_code, request->reason_phrase );
 #endif
+			http_release( request );
+			return request->status_code;
+		}
+#ifdef DEBUG
+		printf( "\nContent type: %s\n\n%s\n", request->content_type, (char const*)request->response_data );
+#endif
+		if(responseSize != 0){
 			if(request->response_size > responseSize)
 				return -1;
 
 			sprintf(response, "%s", request->response_data);
+		}
+		http_release( request );
 
-			http_release( request );
+		return request->status_code;
 
-			return request->status_code;
+}
+
+int sendQueryAsyncInternal(void *arg){
+	//printf("In thread\n");
+	sendQuery(arg, strlen(arg), NULL, 0);
+}
+
+int sendQueryAsync(char *query, int querySize){
+	pthread_t thread;
+	pthread_attr_t attr;
+	pthread_create(&thread, &attr, &sendQueryAsyncInternal, query);
 }
 
 // Creates table with ID "tYYYYMMDD" or something. must be called to populate tableID.
@@ -65,11 +75,11 @@ int createTable(time_t *date){
 	// SELECT object_id FROM sys.tables WHERE name ='{tableId}'
 	sprintf(tableExistsQuery, "SELECT object_id FROM sys.tables WHERE name='%s'", tableId);
 
-	printf("%s\n", tableExistsQuery);
 #ifdef DEBUG
-	char buf[256];
+	printf("%s\n", tableExistsQuery);
 #endif
 
+	char buf[256];
 	if(sendQuery(tableExistsQuery, strlen(tableExistsQuery), buf, sizeof(buf)) != 200)
 		return -1;
 
@@ -124,7 +134,7 @@ int uploadFrame(float heartrate, float temp, float respiration, float sao2, floa
 	printf("insert query: %s\n");
 #endif
 	char * buf[256];
-	sendQuery(query, strlen(query), buf, sizeof(buf));
+	sendQueryAsync(query, strlen(query));
 #ifdef DEBUG
 			//if(buf)
 				//printf("insert query response): %s\n", buf);
