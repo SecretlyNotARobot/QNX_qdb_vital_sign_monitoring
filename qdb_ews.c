@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 		ews_total = calculate_ews(ews_heartrate, ews_temp, ews_respiration, ews_sao2, ews_blood_pressure);
 		printf("Calculated aggregate EWS = %d\n", ews_total);
 		//Send to online database
-		uploadFrame(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, ews_total);
+		uploadFrame(temp, heartrate, respiration, sao2, blood_pressure, ews_total);
 
 	}
 
@@ -152,9 +152,11 @@ int main(int argc, char **argv) {
 
 	time_t endTimestamp;
 	time(&endTimestamp);
-
+	printf("%s UID\n", getUserId());
 	printf("start time: %i end time: %i\nelapsed: %i", startTimestamp, endTimestamp, endTimestamp-startTimestamp);
 
+
+	sleep(5);
 	return EXIT_SUCCESS;
 }
 

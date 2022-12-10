@@ -16,7 +16,7 @@ TARGET = -Vgcc_ntox86_64
 
 CFLAGS += $(DEBUG) $(TARGET) -Wall 
 LDFLAGS+= $(DEBUG) $(TARGET) -lqdb -lsqlite3 -lsocket
-BINS = qdb_respiration qdb_heartrate qdb_ews qdb_no_ews remote_test
+BINS = qdb_ews qdb_no_ews remote_test
 LIBS = includes\$(PLAT)\libqdb.so includes\$(PLAT)\libsqlite3.so includes\$(PLAT)\libicui18n.so includes\$(PLAT)\libicudata.so
 OBJS = db_access.o
 

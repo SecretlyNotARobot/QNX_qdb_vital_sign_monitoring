@@ -29,6 +29,7 @@ int sendQuery(char *query, int querySize, char *response, int responseSize){
 
 				prev_size = (int) request->response_size;
 			}
+			// usleep(8);
 		}
 
 
@@ -57,12 +58,23 @@ int sendQuery(char *query, int querySize, char *response, int responseSize){
 int sendQueryAsyncInternal(void *arg){
 	//printf("In thread\n");
 	sendQuery(arg, strlen(arg), NULL, 0);
+	return 0;
 }
 
 int sendQueryAsync(char *query, int querySize){
 	pthread_t thread;
 	pthread_attr_t attr;
+	struct sched_param param;
+	param.sched_priority = 5;
+
+	pthread_attr_init( &attr );
+	pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+	pthread_attr_setschedparam (&attr, &param);
+	pthread_attr_setschedpolicy (&attr, SCHED_RR);
+
 	pthread_create(&thread, &attr, &sendQueryAsyncInternal, query);
+
+	pthread_detach(thread);
 }
 
 // Creates table with ID "tYYYYMMDD" or something. must be called to populate tableID.
@@ -135,10 +147,6 @@ int uploadFrame(float heartrate, float temp, float respiration, float sao2, floa
 #endif
 	char * buf[256];
 	sendQueryAsync(query, strlen(query));
-#ifdef DEBUG
-			//if(buf)
-				//printf("insert query response): %s\n", buf);
-#endif
 	return 0;
 }
 
